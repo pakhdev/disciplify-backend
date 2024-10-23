@@ -9,5 +9,9 @@ export const envConfig = () => ({
   mysqlUser: process.env.MYSQL_USER,
   mysqlPassword: process.env.MYSQL_PASSWORD,
   mysqlTimezone: process.env.MYSQL_TIMEZONE,
-  mysqlSync: process.env.MYSQL_SYNC.toLowerCase() === 'true',
+  mysqlSync: process.env.MYSQL_SYNC.toLowerCase() === "true",
+
+  daysStatLimit: process.env.DAYS_STAT_LIMIT,
+  weeksStatLimit: process.env.WEEKS_STAT_LIMIT,
+  monthsStatLimit: process.env.MONTHS_STAT_LIMIT,
 });
