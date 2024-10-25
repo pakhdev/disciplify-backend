@@ -8,17 +8,14 @@ import {
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+  @PrimaryGeneratedColumn("increment")
+  id: number;
 
-  @Column("text", { unique: true })
+  @Column("varchar", { unique: true, length: 20 })
   name: string;
 
-  @Column("text", { select: false })
+  @Column("varchar", { select: false })
   password: string;
-
-  @Column("bool", { default: true })
-  isActive: boolean;
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {

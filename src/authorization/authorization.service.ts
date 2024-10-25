@@ -38,24 +38,23 @@ export class AuthorizationService {
     }
   }
 
-  async findById(id: string): Promise<User> {
+  async findById(id: number): Promise<User> {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) throw new NotFoundException("User not found");
     return user;
   }
 
   async update(
-    id: string,
+    id: number,
     user: User,
     updateUserDto: UpdateUserDto,
   ): Promise<Object> {
     if (user.id !== id) throw new ForbiddenException();
 
     try {
-      const { password, ...userData } = updateUserDto;
+      const { password } = updateUserDto;
       const user = await this.userRepository.preload({
         id,
-        ...userData,
         password: bcrypt.hashSync(password, 10),
       });
 

@@ -8,7 +8,6 @@ import {
 
 export class LoginUserDto {
   @IsString()
-  @IsEmail()
   @MinLength(3)
   @MaxLength(20)
   name: string;

@@ -1,10 +1,9 @@
-import { ConfigModule } from '@nestjs/config';
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { envConfig } from '../config/env.config';
-import { JoiValidationSchema } from '../config/joi.validation';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from "@nestjs/config";
+import { Module } from "@nestjs/common";
+import { envConfig } from "../config/env.config";
+import { JoiValidationSchema } from "../config/joi.validation";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { AuthorizationModule } from "./authorization/authorization.module";
 
 @Module({
   imports: [
@@ -13,7 +12,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       validationSchema: JoiValidationSchema,
     }),
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: "mysql",
       host: envConfig().mysqlHost,
       port: envConfig().mysqlPort,
       username: envConfig().mysqlUser,
@@ -22,8 +21,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       autoLoadEntities: true,
       synchronize: envConfig().mysqlSync,
     }),
+    AuthorizationModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

@@ -7,6 +7,7 @@ import {
   Patch,
   Param,
   ParseUUIDPipe,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 
@@ -15,7 +16,7 @@ import { AuthorizationService } from "./authorization.service";
 import { LoginUserDto, CreateUserDto, UpdateUserDto } from "./dto/";
 import { GetUser } from "./decorators/get-user.decorator";
 
-@Controller("auth")
+@Controller("authorization")
 export class AuthorizationController {
   constructor(private readonly authService: AuthorizationService) {}
 
@@ -32,7 +33,7 @@ export class AuthorizationController {
   @UseGuards(AuthGuard())
   @Patch("update/:id")
   updateUser(
-    @Param("id", ParseUUIDPipe) id: string,
+    @Param("id", ParseIntPipe) id: number,
     @GetUser() user: User,
     @Body() updateUserDto: UpdateUserDto,
   ) {
