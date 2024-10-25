@@ -4,6 +4,7 @@ import { envConfig } from "../config/env.config";
 import { JoiValidationSchema } from "../config/joi.validation";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthorizationModule } from "./authorization/authorization.module";
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AuthorizationModule } from "./authorization/authorization.module";
       synchronize: envConfig().mysqlSync,
     }),
     AuthorizationModule,
+    CategoryModule,
   ],
 })
 export class AppModule {}

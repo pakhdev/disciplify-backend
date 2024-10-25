@@ -3,8 +3,10 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { Category } from "../../category/entities/category.entity";
 
 @Entity()
 export class User {
@@ -16,6 +18,9 @@ export class User {
 
   @Column("varchar", { select: false })
   password: string;
+
+  @OneToMany(() => Category, (category) => category.user)
+  categories: Category[];
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {
