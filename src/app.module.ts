@@ -5,6 +5,7 @@ import { JoiValidationSchema } from "../config/joi.validation";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthorizationModule } from "./authorization/authorization.module";
 import { CategoryModule } from './category/category.module';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CategoryModule } from './category/category.module';
     }),
     AuthorizationModule,
     CategoryModule,
+    TaskModule,
   ],
 })
 export class AppModule {}

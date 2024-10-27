@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Category } from "../../category/entities/category.entity";
+import { Task } from "../../task/entities/task.entity";
 
 @Entity()
 export class User {
@@ -21,6 +22,9 @@ export class User {
 
   @OneToMany(() => Category, (category) => category.user)
   categories: Category[];
+
+  @OneToMany(() => Task, (task) => task.user)
+  tasks: Task[];
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {
