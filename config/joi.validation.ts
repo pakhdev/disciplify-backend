@@ -16,4 +16,9 @@ export const JoiValidationSchema = Joi.object({
   MYSQL_USER: Joi.string().required(),
   MYSQL_PASSWORD: Joi.string().required(),
   MYSQL_TIMEZONE: Joi.string().default("Europe/Madrid"),
+
+  BASE_POINTS: Joi.number().default(1),
+  DAYS_STAT_LIMIT: Joi.number().default(12),
+  WEEKS_STAT_LIMIT: Joi.number().default(12),
+  MONTHS_STAT_LIMIT: Joi.number().default(12),
 });

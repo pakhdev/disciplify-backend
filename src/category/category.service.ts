@@ -3,8 +3,9 @@ import { CreateCategoryDto } from "./dto/create-category.dto";
 import { UpdateCategoryDto } from "./dto/update-category.dto";
 import { User } from "../authorization/entities/user.entity";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { Category } from "./entities/category.entity";
+import { Task } from "../task/entities/task.entity";
 
 @Injectable()
 export class CategoryService {
@@ -18,7 +19,7 @@ export class CategoryService {
     user: User,
   ): Promise<Category> {
     const { name } = createCategoryDto;
-    const category = { name, user };
+    const category = this.categoriesRepository.create({ name, user });
     return this.categoriesRepository.save(category);
   }
 
@@ -28,6 +29,12 @@ export class CategoryService {
     });
     if (!category) throw new Error("Category not found");
     return category;
+  }
+
+  async findWithIds(ids: number[], user: User): Promise<Category[]> {
+    return await this.categoriesRepository.find({
+      where: { id: In(ids), user },
+    });
   }
 
   async findAll(user: User): Promise<Category[]> {

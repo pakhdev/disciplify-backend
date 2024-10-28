@@ -9,5 +9,6 @@ import { AuthorizationModule } from "../authorization/authorization.module";
   imports: [TypeOrmModule.forFeature([Category]), AuthorizationModule],
   controllers: [CategoryController],
   providers: [CategoryService],
+  exports: [CategoryService],
 })
 export class CategoryModule {}

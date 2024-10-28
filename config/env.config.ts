@@ -15,6 +15,7 @@ export const envConfig = () => ({
   mysqlTimezone: process.env.MYSQL_TIMEZONE,
   mysqlSync: process.env.MYSQL_SYNC.toLowerCase() === "true",
 
+  basePoints: +process.env.BASE_POINTS,
   daysStatLimit: process.env.DAYS_STAT_LIMIT,
   weeksStatLimit: process.env.WEEKS_STAT_LIMIT,
   monthsStatLimit: process.env.MONTHS_STAT_LIMIT,
