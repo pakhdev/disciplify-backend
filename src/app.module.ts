@@ -4,8 +4,11 @@ import { envConfig } from "../config/env.config";
 import { JoiValidationSchema } from "../config/joi.validation";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthorizationModule } from "./authorization/authorization.module";
-import { CategoryModule } from './category/category.module';
-import { TaskModule } from './task/task.module';
+import { CategoryModule } from "./category/category.module";
+import { TaskModule } from "./task/task.module";
+import { ScheduleModule } from "@nestjs/schedule";
+import { MaintenanceService } from "./maintenance/maintenance.service";
+import { StatisticModule } from "./statistic/statistic.module";
 
 @Module({
   imports: [
@@ -23,9 +26,12 @@ import { TaskModule } from './task/task.module';
       autoLoadEntities: true,
       synchronize: envConfig().mysqlSync,
     }),
+    // ScheduleModule.forRoot(),
     AuthorizationModule,
     CategoryModule,
     TaskModule,
+    StatisticModule,
   ],
+  // providers: [MaintenanceService],
 })
 export class AppModule {}
