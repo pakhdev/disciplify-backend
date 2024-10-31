@@ -39,6 +39,11 @@ export class TaskController {
     return this.taskService.findAllFinished(user);
   }
 
+  @Patch("record/:id")
+  record(@Param("id") id: string, @GetUser() user: User): Promise<Task> {
+    return this.taskService.record(+id, user);
+  }
+
   @Patch(":id")
   update(
     @Param("id") id: string,
