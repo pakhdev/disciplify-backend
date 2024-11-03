@@ -30,6 +30,12 @@ import { AuthorizationController } from "./authorization.controller";
   ],
   controllers: [AuthorizationController],
   providers: [AuthorizationService, JwtStrategy],
-  exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule],
+  exports: [
+    TypeOrmModule,
+    JwtStrategy,
+    PassportModule,
+    JwtModule,
+    AuthorizationService,
+  ],
 })
 export class AuthorizationModule {}

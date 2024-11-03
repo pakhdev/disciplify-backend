@@ -14,5 +14,6 @@ import { AuthorizationModule } from "../authorization/authorization.module";
   ],
   controllers: [StatisticController],
   providers: [StatisticService],
+  exports: [StatisticService],
 })
 export class StatisticModule {}

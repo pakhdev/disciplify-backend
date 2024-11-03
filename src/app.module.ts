@@ -26,12 +26,12 @@ import { StatisticModule } from "./statistic/statistic.module";
       autoLoadEntities: true,
       synchronize: envConfig().mysqlSync,
     }),
-    // ScheduleModule.forRoot(),
+    ScheduleModule.forRoot(),
     AuthorizationModule,
     CategoryModule,
     TaskModule,
     StatisticModule,
   ],
-  // providers: [MaintenanceService],
+  providers: [MaintenanceService],
 })
 export class AppModule {}

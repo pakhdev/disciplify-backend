@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { LessThan, Repository } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 
@@ -96,6 +96,17 @@ export class AuthorizationService {
       ...user,
       token: this.getJwtToken({ id: user.id }),
     };
+  }
+
+  async findUsersWithOldStatisticDate(): Promise<User[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return this.userRepository.find({
+      where: {
+        statisticDate: LessThan(today),
+      },
+    });
   }
 
   private getJwtToken(payload: JwtPayload) {
