@@ -109,6 +109,11 @@ export class AuthorizationService {
     });
   }
 
+  async markStatisticDate(date: Date, user: User): Promise<void> {
+    user.statisticDate = date;
+    await this.userRepository.save(user);
+  }
+
   private getJwtToken(payload: JwtPayload) {
     return this.jwtService.sign(payload);
   }

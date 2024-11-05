@@ -18,6 +18,6 @@ export class DayStatistic {
   @Column()
   isOptional: boolean;
 
-  @Column({ nullable: false })
+  @Column({ type: "date", nullable: false })
   date: Date;
 }

@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { User } from "../authorization/entities/user.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DayStatistic } from "./entities/day-statistic.entity";
-import { Repository } from "typeorm";
+import { Between, Repository } from "typeorm";
 import { MonthStatistic } from "./entities/month-statistic.entity";
 import { WeekStatistic } from "./entities/week-statistic.entity";
 import { envConfig } from "../../config/env.config";
@@ -36,6 +36,37 @@ export class StatisticService {
     return { dayStatistics, weekStatistics, monthStatistics };
   }
 
+  async findByDatesRange(
+    start: Date,
+    end: Date,
+    user: User,
+  ): Promise<DayStatistic[]> {
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+    return await this.dayStatisticRepository.find({
+      where: { user, date: Between(start, end) },
+    });
+  }
+
+  calculateAverageScore(stats: DayStatistic[]): PeriodStatistics {
+    const calculateAverage = (stats: DayStatistic[]): TaskTypeStatistics => {
+      const points = Math.round(
+        stats.reduce((acc, stat) => acc + stat.points, 0) / stats.length,
+      );
+      const percentage = Math.round(
+        stats.reduce((acc, stat) => acc + stat.percentage, 0) / stats.length,
+      );
+      return { points, percentage };
+    };
+
+    return {
+      mandatoryTasks: calculateAverage(
+        stats.filter((stat) => !stat.isOptional),
+      ),
+      optionalTasks: calculateAverage(stats.filter((stat) => stat.isOptional)),
+    };
+  }
+
   calculateStatsForDay(tasks: Task[]): PeriodStatistics {
     const calculateStats = (tasks: Task[]): TaskTypeStatistics => {
       const points = tasks.reduce((acc, task) => acc + task.currentScore, 0);
@@ -47,25 +78,6 @@ export class StatisticService {
       mandatoryTasks: calculateStats(tasks.filter((task) => !task.isOptional)),
       optionalTasks: calculateStats(tasks.filter((task) => task.isOptional)),
     };
-  }
-
-  async calculateStatsForWeek(
-    weekNumber: number,
-    user: User,
-  ): Promise<PeriodStatistics | void> {
-    // Get start and end dates of the week
-    // Find week statistic
-    // If there's statistic of all days of the week, return it
-    return;
-  }
-
-  async calculateStatsForMonth(
-    monthNumber: number,
-    user: User,
-  ): Promise<PeriodStatistics | void> {
-    // Get start and end dates of the month
-    // Find month statistic
-    // If there's statistic of all days of the month, return it
   }
 
   async saveDayStatistic(

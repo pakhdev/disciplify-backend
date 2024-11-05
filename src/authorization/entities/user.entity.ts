@@ -23,7 +23,7 @@ export class User {
   @Column("varchar", { select: false })
   password: string;
 
-  @Column({ default: () => "NOW()" })
+  @Column({ type: "date", default: () => "(CURRENT_DATE)" })
   statisticDate: Date;
 
   @OneToMany(() => Category, (category) => category.user)
