@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { User } from "../authorization/entities/user.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DayStatistic } from "./entities/day-statistic.entity";
-import { Between, Repository } from "typeorm";
+import { Between, LessThan, Repository } from "typeorm";
 import { MonthStatistic } from "./entities/month-statistic.entity";
 import { WeekStatistic } from "./entities/week-statistic.entity";
 import { envConfig } from "../../config/env.config";
@@ -88,6 +88,7 @@ export class StatisticService {
     await this.saveStatistic(
       this.dayStatisticRepository,
       currentDay,
+      null,
       statistic,
       user,
       "date",
@@ -96,12 +97,14 @@ export class StatisticService {
 
   async saveWeekStatistic(
     weekNumber: number,
+    year: number,
     statistic: PeriodStatistics,
     user: User,
   ): Promise<void> {
     await this.saveStatistic(
       this.weekStatisticRepository,
       weekNumber,
+      year,
       statistic,
       user,
       "week",
@@ -110,12 +113,14 @@ export class StatisticService {
 
   async saveMonthStatistic(
     monthNumber: number,
+    year: number,
     statistic: PeriodStatistics,
     user: User,
   ): Promise<void> {
     await this.saveStatistic(
       this.monthStatisticRepository,
       monthNumber,
+      year,
       statistic,
       user,
       "month",
@@ -125,6 +130,7 @@ export class StatisticService {
   async saveStatistic<T extends DayStatistic | WeekStatistic | MonthStatistic>(
     repo: Repository<T>,
     periodValue: number | Date,
+    year: number | null,
     statistic: PeriodStatistics,
     user: User,
     periodField: keyof T,
@@ -140,6 +146,7 @@ export class StatisticService {
       stat.points = points;
       stat.percentage = percentage;
       stat.isOptional = isOptional;
+      if (year) stat.year = year;
       return stat;
     };
 
@@ -157,5 +164,35 @@ export class StatisticService {
     ];
 
     await repo.save(stats);
+  }
+
+  async purgeDayStatisticsBefore(date: Date): Promise<void> {
+    await this.dayStatisticRepository.delete({
+      date: LessThan(date),
+    });
+  }
+
+  async purgeWeekStatisticsBefore(
+    weekNumber: number,
+    year: number,
+  ): Promise<void> {
+    await this.weekStatisticRepository
+      .createQueryBuilder()
+      .delete()
+      .where("year < :year", { year })
+      .orWhere("year = :year AND week < :week", { year, week: weekNumber })
+      .execute();
+  }
+
+  async purgeMonthStatisticsBefore(
+    monthNumber: number,
+    year: number,
+  ): Promise<void> {
+    await this.monthStatisticRepository
+      .createQueryBuilder()
+      .delete()
+      .where("year < :year", { year })
+      .orWhere("year = :year AND month < :week", { year, week: monthNumber })
+      .execute();
   }
 }

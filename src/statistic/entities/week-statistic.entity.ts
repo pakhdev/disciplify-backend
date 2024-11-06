@@ -20,4 +20,7 @@ export class WeekStatistic {
 
   @Column()
   week: number;
+
+  @Column()
+  year: number;
 }

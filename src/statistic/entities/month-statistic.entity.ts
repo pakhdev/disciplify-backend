@@ -20,4 +20,7 @@ export class MonthStatistic {
 
   @Column()
   month: number;
+
+  @Column()
+  year: number;
 }
