@@ -4,6 +4,7 @@ import { Cron } from "@nestjs/schedule";
 import { AuthorizationService } from "../authorization/authorization.service";
 import { StatisticService } from "../statistic/statistic.service";
 import { User } from "../authorization/entities/user.entity";
+import { envConfig } from "../../config/env.config";
 
 @Injectable()
 export class MaintenanceService implements OnModuleInit {
@@ -36,6 +37,7 @@ export class MaintenanceService implements OnModuleInit {
       await this.authorizationService.markStatisticDate(new Date(), user);
     }
 
+    await this.cleanupOldStatistics();
     console.log("Maintenance finished");
   }
 
@@ -44,10 +46,13 @@ export class MaintenanceService implements OnModuleInit {
     user: User,
   ): Promise<void> {
     const tasks = await this.taskService.findByDate(date, user);
+    tasks.forEach((task) => this.taskService.finishTask);
+
     const dateStatistic = this.statisticService.calculateStatsForDay(tasks);
 
     const currentDayWeekNumber = this.getWeekNumber(date);
     const currentDayMonthNumber = this.getMonthNumber(date);
+    const currentDayYearNumber = this.getYearNumber(date);
 
     const nextDay = this.getNextDayDate(date);
     const nextDayWeekNumber = this.getWeekNumber(nextDay);
@@ -67,6 +72,7 @@ export class MaintenanceService implements OnModuleInit {
         this.statisticService.calculateAverageScore(weekStatisticValues);
       await this.statisticService.saveWeekStatistic(
         currentDayWeekNumber,
+        currentDayYearNumber,
         weekStatistic,
         user,
       );
@@ -93,10 +99,30 @@ export class MaintenanceService implements OnModuleInit {
         this.statisticService.calculateAverageScore(monthStatisticValues);
       await this.statisticService.saveMonthStatistic(
         currentDayMonthNumber,
+        currentDayYearNumber,
         monthStatistic,
         user,
       );
     }
+  }
+
+  private async cleanupOldStatistics() {
+    const config = envConfig();
+    const dayThreshold = this.calculateThresholdDay(35);
+    const weekThreshold = this.calculateThresholdWeek(+config.weeksStatLimit);
+    const monthThreshold = this.calculateThresholdMonth(
+      +config.monthsStatLimit,
+    );
+
+    await this.statisticService.purgeDayStatisticsBefore(dayThreshold);
+    await this.statisticService.purgeWeekStatisticsBefore(
+      weekThreshold.week,
+      weekThreshold.year,
+    );
+    await this.statisticService.purgeMonthStatisticsBefore(
+      monthThreshold.month,
+      monthThreshold.year,
+    );
   }
 
   private getDateRange(startDate: Date, endDate: Date): Date[] {
@@ -175,5 +201,34 @@ export class MaintenanceService implements OnModuleInit {
 
   private getDaysInMonth(year: number, month: number): number {
     return new Date(year, month, 0).getDate();
+  }
+
+  private calculateThresholdMonth(monthsAgo: number): {
+    year: number;
+    month: number;
+  } {
+    const date = new Date();
+    date.setMonth(date.getMonth() - monthsAgo);
+
+    return {
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+    };
+  }
+
+  calculateThresholdWeek(weeksAgo: number): { year: number; week: number } {
+    const date = new Date();
+    date.setDate(date.getDate() - weeksAgo * 7);
+
+    return {
+      year: date.getFullYear(),
+      week: this.getWeekNumber(date),
+    };
+  }
+
+  calculateThresholdDay(daysAgo: number): Date {
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+    return date;
   }
 }

@@ -108,6 +108,12 @@ export class TaskService {
     await this.tasksRepository.delete({ id, user });
   }
 
+  async finishTask(task: Task): Promise<void> {
+    if (task.isRecurring) return;
+    task.finished = true;
+    await this.tasksRepository.save(task);
+  }
+
   private calculateMaxScore(
     difficulty: number,
     iterationLimit: number,
