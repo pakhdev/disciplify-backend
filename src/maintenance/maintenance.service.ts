@@ -60,6 +60,10 @@ export class MaintenanceService implements OnModuleInit {
 
     await this.statisticService.saveDayStatistic(date, dateStatistic, user);
 
+    tasks
+      .filter((task) => task.isRecurring)
+      .forEach((task) => this.taskService.resetTask(task));
+
     if (currentDayWeekNumber !== nextDayWeekNumber) {
       const weekRange = this.getWeekRange(date);
       const weekStatisticValues = await this.statisticService.findByDatesRange(
