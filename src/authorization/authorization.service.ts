@@ -4,6 +4,7 @@ import {
     NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -12,6 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { LoginUserDto, CreateUserDto, UpdateUserDto } from './dto/';
 import { User } from './entities/user.entity';
+import { envConfig } from '../../config/env.config';
 
 @Injectable()
 export class AuthorizationService {
@@ -87,11 +89,8 @@ export class AuthorizationService {
         };
     }
 
-    async checkAuthStatus(user: User) {
-        return {
-            ...user,
-            token: this.getJwtToken({ id: user.id }),
-        };
+    public async checkAuthStatus(user: User, res: Response): Promise<void> {
+        this.setAuthCookies(res, user);
     }
 
     async findUsersWithOldStatisticDate(): Promise<User[]> {
@@ -108,6 +107,22 @@ export class AuthorizationService {
     async markStatisticDate(date: Date, user: User): Promise<void> {
         user.statisticDate = date;
         await this.userRepository.save(user);
+    }
+
+    async isNameRegistered(name: string): Promise<{ isRegistered: boolean }> {
+        const findEmail = await this.userRepository.findOneBy({ name });
+        return { isRegistered: !!findEmail };
+    }
+
+    private setAuthCookies(res: Response, user: User, redirect?: boolean, muteResponse?: boolean): void {
+        const token = this.getJwtToken({ id: user.id });
+        const expirationDate = new Date();
+        expirationDate.setSeconds(expirationDate.getSeconds() + envConfig().jwtExpiresInSeconds);
+
+        res.cookie('id', user.id.toString(), { expires: expirationDate });
+        res.cookie('name', user.name, { expires: expirationDate });
+        res.cookie('token', token, { httpOnly: true, expires: expirationDate });
+        res.json({ message: 'Success' });
     }
 
     private getJwtToken(payload: JwtPayload) {
