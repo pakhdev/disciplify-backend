@@ -7,13 +7,14 @@ import {
     Patch,
     Param,
     ParseUUIDPipe,
-    ParseIntPipe,
+    ParseIntPipe, Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 
 import { AuthorizationService } from './authorization.service';
 import { GetUser } from './decorators/get-user.decorator';
-import { LoginUserDto, CreateUserDto, UpdateUserDto } from './dto/';
+import { LoginUserDto, CreateUserDto, UpdateUserDto, AuthErrorResponseDto } from './dto/';
 import { User } from './entities/user.entity';
 
 @Controller('authorization')
@@ -21,8 +22,8 @@ export class AuthorizationController {
     constructor(private readonly authService: AuthorizationService) {}
 
     @Post('register')
-    createUser(@Body() createUserDto: CreateUserDto) {
-        return this.authService.create(createUserDto);
+    register(@Body() createUserDto: CreateUserDto, @Res() res: Response): Promise<void | AuthErrorResponseDto> {
+        return this.authService.register(createUserDto, res);
     }
 
     @Post('login')
@@ -42,7 +43,7 @@ export class AuthorizationController {
 
     @Get('check-auth-status')
     @UseGuards(AuthGuard())
-    checkAuthStatus(@GetUser() user: User) {
-        return this.authService.checkAuthStatus(user);
+    checkAuthStatus(@GetUser() user: User, @Res() res: Response) {
+        return this.authService.checkAuthStatus(user, res);
     }
 }

@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     ForbiddenException,
     Injectable,
     NotFoundException,
@@ -11,7 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
 import { JwtPayload } from './interfaces/jwt-payload.interface';
-import { LoginUserDto, CreateUserDto, UpdateUserDto } from './dto/';
+import { LoginUserDto, CreateUserDto, UpdateUserDto, AuthErrorResponseDto } from './dto/';
 import { User } from './entities/user.entity';
 import { envConfig } from '../../config/env.config';
 
@@ -22,19 +23,21 @@ export class AuthorizationService {
         private readonly jwtService: JwtService,
     ) {}
 
-    async create(createUserDto: CreateUserDto) {
+    public async register(registerUserDto: CreateUserDto, res: Response): Promise<void | AuthErrorResponseDto> {
+        const isNameTaken = await this.isNameRegistered(registerUserDto.name);
+        if (isNameTaken.isRegistered) throw new BadRequestException({ errorCode: 'nameTaken' });
+        return await this.create(registerUserDto, res);
+    }
+
+    async create(createUserDto: CreateUserDto, res: Response) {
         try {
             const { password, ...userData } = createUserDto;
             const user = this.userRepository.create({
                 ...userData,
                 password: bcrypt.hashSync(password, 10),
             });
-            await this.userRepository.save(user);
-            delete user.password;
-            return {
-                ...user,
-                token: this.getJwtToken({ id: user.id }),
-            };
+            const savedUser = await this.userRepository.save(user);
+            this.setAuthCookies(res, savedUser);
         } catch (error) {
             console.log('AuthorizationModule', error);
         }
@@ -114,7 +117,7 @@ export class AuthorizationService {
         return { isRegistered: !!findEmail };
     }
 
-    private setAuthCookies(res: Response, user: User, redirect?: boolean, muteResponse?: boolean): void {
+    private setAuthCookies(res: Response, user: User): void {
         const token = this.getJwtToken({ id: user.id });
         const expirationDate = new Date();
         expirationDate.setSeconds(expirationDate.getSeconds() + envConfig().jwtExpiresInSeconds);
