@@ -12,7 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
 import { JwtPayload } from './interfaces/jwt-payload.interface';
-import { LoginUserDto, CreateUserDto, UpdateUserDto, AuthErrorResponseDto } from './dto/';
+import { LoginUserDto, CreateUserDto, AuthErrorResponseDto, UpdatePasswordDto } from './dto/';
 import { User } from './entities/user.entity';
 import { envConfig } from '../../config/env.config';
 
@@ -49,25 +49,28 @@ export class AuthorizationService {
         return user;
     }
 
-    async update(id: number, user: User, updateUserDto: UpdateUserDto): Promise<Object> {
-        if (user.id !== id) throw new ForbiddenException();
+    async updatePassword(user: User, updatePasswordDto: UpdatePasswordDto, res: Response): Promise<void | AuthErrorResponseDto> {
+        const { name } = user;
+        const { oldPassword, newPassword } = updatePasswordDto;
+        const userToUpdate = await this.userRepository.findOne({
+            select: { id: true, name: true, password: true },
+            where: { name: name.toLowerCase().trim() },
+        });
+
+        if (!userToUpdate)
+            throw new NotFoundException({ errorCode: 'userNotFound' });
+        if (userToUpdate.password !== null && !bcrypt.compareSync(oldPassword, userToUpdate.password))
+            throw new UnauthorizedException({ errorCode: 'wrongOldPassword' });
+        if (userToUpdate.password !== null && bcrypt.compareSync(newPassword, userToUpdate.password))
+            throw new BadRequestException({ errorCode: 'passwordMatchesOld' });
 
         try {
-            const { password } = updateUserDto;
-            const user = await this.userRepository.preload({
-                id,
-                password: bcrypt.hashSync(password, 10),
+            const updateUser = await this.userRepository.preload({
+                id: user.id,
+                password: bcrypt.hashSync(newPassword, 10),
             });
-
-            if (!user) throw new NotFoundException('User not found');
-
-            await this.userRepository.save(user);
-            delete user.password;
-
-            return {
-                ...user,
-                token: this.getJwtToken({ id: user.id }),
-            };
+            const updatedUser = await this.userRepository.save(updateUser);
+            this.setAuthCookies(res, updatedUser);
         } catch (error) {
             console.log('AuthorizationModule', error);
         }

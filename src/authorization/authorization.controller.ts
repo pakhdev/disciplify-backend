@@ -5,16 +5,14 @@ import {
     Body,
     UseGuards,
     Patch,
-    Param,
-    ParseUUIDPipe,
-    ParseIntPipe, Res,
+    Res,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 
 import { AuthorizationService } from './authorization.service';
 import { GetUser } from './decorators/get-user.decorator';
-import { LoginUserDto, CreateUserDto, UpdateUserDto, AuthErrorResponseDto } from './dto/';
+import { LoginUserDto, CreateUserDto, AuthErrorResponseDto, UpdatePasswordDto } from './dto/';
 import { User } from './entities/user.entity';
 
 @Controller('authorization')
@@ -32,13 +30,9 @@ export class AuthorizationController {
     }
 
     @UseGuards(AuthGuard())
-    @Patch('update/:id')
-    updateUser(
-        @Param('id', ParseIntPipe) id: number,
-        @GetUser() user: User,
-        @Body() updateUserDto: UpdateUserDto,
-    ) {
-        return this.authService.update(id, user, updateUserDto);
+    @Patch('update-password')
+    updatePassword(@GetUser() user: User, @Body() updatePasswordDto: UpdatePasswordDto, @Res() res: Response): Promise<void | AuthErrorResponseDto> {
+        return this.authService.updatePassword(user, updatePasswordDto, res);
     }
 
     @Get('check-auth-status')

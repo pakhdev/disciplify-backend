@@ -4,6 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException, Injectable } from '@nestjs/common';
+import { Request } from 'express';
 
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { User } from '../entities/user.entity';
@@ -16,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     ) {
         super({
             secretOrKey: configService.get('JWT_SECRET'),
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: ExtractJwt.fromExtractors([JwtStrategy.extractJWT]),
         });
     }
 
@@ -25,5 +26,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         const user = await this.userRepository.findOneBy({ id });
         if (!user) throw new UnauthorizedException('Token not valid');
         return user;
+    }
+
+    private static extractJWT(req: Request): string | null {
+        const cookies = req.headers.cookie?.split(';')
+            .map(cookie => cookie.trim().split('='))
+            .find(([key]) => key === 'token');
+
+        return cookies?.[1] || null;
     }
 }
