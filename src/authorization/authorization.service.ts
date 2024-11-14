@@ -76,23 +76,18 @@ export class AuthorizationService {
         }
     }
 
-    async login(loginUserDto: LoginUserDto) {
+    async login(loginUserDto: LoginUserDto, res: Response): Promise<void | AuthErrorResponseDto> {
         const { password, name } = loginUserDto;
         const user = await this.userRepository.findOne({
             where: { name: name.toLowerCase().trim() },
             select: { id: true, name: true, password: true },
         });
         if (!user) {
-            throw new UnauthorizedException('Credentials are not valid (email)');
+            throw new UnauthorizedException({ errorCode: 'userNotFound' });
         }
         if (!bcrypt.compareSync(password, user.password))
             throw new UnauthorizedException('Credentials are not valid (password)');
-
-        delete user.password;
-        return {
-            ...user,
-            token: this.getJwtToken({ id: user.id }),
-        };
+        this.setAuthCookies(res, user);
     }
 
     public async checkAuthStatus(user: User, res: Response): Promise<void> {

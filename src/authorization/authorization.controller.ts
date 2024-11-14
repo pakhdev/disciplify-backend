@@ -25,8 +25,8 @@ export class AuthorizationController {
     }
 
     @Post('login')
-    loginUser(@Body() loginUserDto: LoginUserDto) {
-        return this.authService.login(loginUserDto);
+    login(@Body() loginUserDto: LoginUserDto, @Res() res: Response): Promise<void | AuthErrorResponseDto> {
+        return this.authService.login(loginUserDto, res);
     }
 
     @UseGuards(AuthGuard())
@@ -37,7 +37,7 @@ export class AuthorizationController {
 
     @Get('check-auth-status')
     @UseGuards(AuthGuard())
-    checkAuthStatus(@GetUser() user: User, @Res() res: Response) {
+    checkAuthStatus(@GetUser() user: User, @Res() res: Response): Promise<void> {
         return this.authService.checkAuthStatus(user, res);
     }
 }
