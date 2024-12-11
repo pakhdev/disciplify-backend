@@ -5,6 +5,7 @@ import {
     Body,
     UseGuards,
     Patch,
+    Query,
     Res,
 } from '@nestjs/common';
 import { Response } from 'express';
@@ -12,7 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 
 import { AuthorizationService } from './authorization.service';
 import { GetUser } from './decorators/get-user.decorator';
-import { LoginUserDto, CreateUserDto, AuthErrorResponseDto, UpdatePasswordDto } from './dto/';
+import { LoginUserDto, CreateUserDto, AuthErrorResponseDto, UpdatePasswordDto, CheckNameDto } from './dto/';
 import { User } from './entities/user.entity';
 
 @Controller('authorization')
@@ -27,6 +28,11 @@ export class AuthorizationController {
     @Post('login')
     login(@Body() loginUserDto: LoginUserDto, @Res() res: Response): Promise<void | AuthErrorResponseDto> {
         return this.authService.login(loginUserDto, res);
+    }
+
+    @Get('check-name')
+    checkName(@Query() checkNameDto: CheckNameDto): Promise<{ isRegistered: boolean }> {
+        return this.authService.isNameRegistered(checkNameDto.name);
     }
 
     @UseGuards(AuthGuard())

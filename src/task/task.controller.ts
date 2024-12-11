@@ -33,7 +33,7 @@ export class TaskController {
     }
 
     @Get('finished')
-    findAllRemoved(@GetUser() user: User): Promise<Task[]> {
+    findAllFinished(@GetUser() user: User): Promise<Task[]> {
         return this.taskService.findAllFinished(user);
     }
 

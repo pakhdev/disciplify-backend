@@ -127,7 +127,7 @@ export class TaskService {
 
         let supposedDate = this.addDaysToDate(currentActivationDate, task.repeatInterval);
 
-        if (task.restricted_days_policy === RestrictedDaysPolicy.BEFORE) {
+        if (task.restrictedDaysPolicy === RestrictedDaysPolicy.BEFORE) {
             let nextActivationDate = this.findAllowedDayBetweenDates(
                 currentActivationDate,
                 supposedDate,

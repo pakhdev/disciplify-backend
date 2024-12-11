@@ -18,7 +18,7 @@ import { TaskType } from '../enums/task-type.enum';
 export class CreateTaskDto {
     @IsString()
     @IsNotEmpty()
-    name: string;
+    title: string;
 
     @IsEnum(TaskType)
     type: TaskType;

@@ -18,7 +18,7 @@ export class Task {
     id: number;
 
     @Column({ length: 255, nullable: false })
-    name: string;
+    title: string;
 
     @Column({ type: 'enum', enum: TaskType, default: TaskType.TO_DO })
     type: TaskType;
@@ -61,7 +61,7 @@ export class Task {
         enum: RestrictedDaysPolicy,
         default: RestrictedDaysPolicy.BEFORE,
     })
-    restricted_days_policy: RestrictedDaysPolicy;
+    restrictedDaysPolicy: RestrictedDaysPolicy;
 
     @Column({ default: false })
     finished: boolean;

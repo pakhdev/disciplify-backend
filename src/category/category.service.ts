@@ -14,10 +14,14 @@ export class CategoryService {
         private readonly categoriesRepository: Repository<Category>,
     ) {}
 
-    async create(createCategoryDto: CreateCategoryDto, user: User): Promise<Category> {
+    async create(createCategoryDto: CreateCategoryDto, user: User): Promise<{ id: number; name: string }> {
         const { name } = createCategoryDto;
         const category = this.categoriesRepository.create({ name, user });
-        return this.categoriesRepository.save(category);
+        const savedCategory = await this.categoriesRepository.save(category);
+        return {
+            id: savedCategory.id,
+            name: savedCategory.name,
+        };
     }
 
     async findById(id: number, user: User): Promise<Category> {
